@@ -60,3 +60,29 @@ def AlgoOptimiseTab(S: int, V: list[int]) -> tuple[int, list[int]]:
 
 V = [1, 2, 5, 10, 20, 50, 100, 200]
 print(AlgoOptimiseTab(748, V))
+
+
+def calc_backword(S: int, M: int, V: list[int], A: list[int], i: int) -> list[int]:
+    # Solution
+    if M == 0 and S == 0:
+        return True
+    # No solution
+    if M == 0 or S < 0 or i == 0:
+        return False
+    sol1 = calc_backword(S, M, V, A, i-1)
+    if sol1:
+        return A
+    A[i-1] += 1
+    sol2 = calc_backword(S-V[i-1], M-1, V, A, i)
+    if sol2:
+        return A
+    A[i-1] -= 1
+
+
+# V = [1, 2]
+
+S = 748
+A = [0] * len(V)
+M = AlgoOptimise(S, V)
+
+print(calc_backword(S, M, V, A, len(V)))
