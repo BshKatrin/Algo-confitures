@@ -1,8 +1,7 @@
-# Les imports
 import time
 from typing import Callable
 import pandas as pd
-from algos import min_Jars_rec, min_Jars_ite, algorithm_Glouton, algorithm_Glouton_aux
+from algos import min_Jars_rec, min_Jars_ite, min_Jars_ite_backtrack, algorithm_Glouton
 
 
 def time_cpu(Smax: int, kmax: int, func: Callable, d: int, max_time: int = None) -> pd.DataFrame:
@@ -21,48 +20,60 @@ def time_cpu(Smax: int, kmax: int, func: Callable, d: int, max_time: int = None)
         indices de 1 à kmax - 1.
 
     func : function 
-        L'algorithme à exécuter pour chaque combinaison de valeurs de x (quantité de confiture)
-        et y (nombre de bocaux). Cette fonction doit prendre trois arguments :
-          - x (int) : la quantité de confiture pour l'itération actuelle.
+        L'algorithme à exécuter pour chaque combinaison de valeurs de s (quantité de confiture)
+        et k (nombre de bocaux). Cette fonction doit prendre trois arguments :
+          - s (int) : la quantité de confiture pour l'itération actuelle.
           - V (list) : une liste représentant les capacités des bocaux pour cette itération.
-          - y (int) : le nombre de bocaux utilisés pour cette itération.
+          - k (int) : le nombre de bocaux utilisés pour cette itération.
+    d : int
+        La valeur pour remplir le système de capacité V (V[i] = d^{i})
+
+    max_time : int (default = None)
+        Temps CPU maximum pour l'exécution de func (en secondes).
+        Les calculs pour les valeurs supérieures s'arrêtent si le temps d'exécution de func dépasse max_time.
+        Les lignes restantes du DataFrame retourné seront vides.
 
     Returns:
     --------
     df : pd.DataFrame
-        Un DataFrame Pandas contenant les temps d'exécution de la fonction `func`
-        pour chaque combinaison de valeurs de x (lignes) et y (colonnes).
-        Les lignes sont nommées `s10`, `s20`, ..., `s{Smax-10}` et les colonnes sont nommées `k1`, `k2`, ..., `k{kmax-1}`.
+        Un DataFrame Pandas contenant les temps d'exécution de la fonction func
+        pour chaque combinaison de valeurs de s (lignes) et k (colonnes).
+        Les lignes sont associées aux valeurs de S (10, 20, ..., Smax-10). 
+        Les colonnes sont associées aux valeurs de k (1, 2, ..., kmax-1).
     """
 
-    # Créer les noms des lignes sous la forme s10, s20, ..., jusqu'à Smax
-    rows = [f'{x}' for x in range(10, Smax, 10)]
+    # Créer des lignes associées aux valeurs de s (10, 20, ..., Smax-10)
+    rows = [f'{s}' for s in range(10, Smax, 10)]
 
-    # Créer les noms des colonnes sous la forme k1, k2, ..., jusqu'à kmax-1
-    columns = [f'{x}' for x in range(1, kmax)]
+    # Créer des colonnes associées aux valeurs de k (1, 2, ..., kmax-1)
+    columns = [f'{k}' for k in range(1, kmax)]
+
     # Créer un DataFrame vide avec les lignes (rows) et colonnes (columns)
     df = pd.DataFrame(index=rows, columns=columns)
 
+    # Flag de l'arrêt d'exécution si le temps dépasse max_time
     stop_exec = False
-    # Boucle sur chaque valeur de x (incréments de 10) et y (incréments de 1)
-    for x in range(10, Smax, 10):
-        print(x)
-        for y in range(1, kmax):
+
+    # Boucle sur chaque valeur de s (incréments de 10) et k (incréments de 1)
+    for s in range(10, Smax, 10):
+        for k in range(1, kmax):
             # Créer la liste V : les capacités des pots (d est utilisé)
-            V = [d ** i for i in range(y)]
-            # print(V)
+            V = [d ** i for i in range(k)]
+
             # Chronométrer l'exécution de la fonction func(x, V, y)
             timeStart = time.time()  # Démarrer le chrono
-            func(x, V, y)            # Appeler la fonction `func`
+            func(s, V, k)
             timeEnd = time.time()    # Arrêter le chrono
 
             # Stocker la durée d'exécution (sec) dans la cellule correspondante du DataFrame
-            df.loc[f'{x}', f'{y}'] = timeEnd - timeStart
-            # Arret des calculs si le temps d'execution > max_time
+            df.loc[f'{s}', f'{k}'] = timeEnd - timeStart
+
+            # Arrêt des calculs si le temps d'execution > max_time
             if max_time and timeEnd - timeStart > max_time:
                 stop_exec = True
                 break
 
+        # Arrêt des calculs si le temps d'execution > max_time
         if stop_exec:
             break
 
@@ -70,15 +81,13 @@ def time_cpu(Smax: int, kmax: int, func: Callable, d: int, max_time: int = None)
     return df
 
 
-def save_csv(csv_name: str, df: pd.DataFrame) -> None:
-    # df.to_csv(csv_name, names = )
-    df.to_csv(csv_name)
-
-
 if __name__ == "__main__":
-    df = time_cpu(5000, 8, algorithm_Glouton_aux, d=4, max_time=10)
-    save_csv("data/test4.csv", df)
-    # k = 5
-    # V = [3 ** i for i in range(k)]
+    S = 500
+    k = 6
+    d = 4
+    func = min_Jars_ite_backtrack
+    f_name = {algorithm_Glouton: "glouton", min_Jars_ite: "ite",
+              min_Jars_rec: "rec", min_Jars_ite_backtrack: "backtrack"}
 
-    # assert (algorithm_Glouton(s, V, k) == min_Jars_ite(s, V, k))
+    df = time_cpu(S, k, func, d, max_time=30)
+    df.to_csv(f"data/{f_name[func]}_s{S}_k{k}_d{d}.csv")
