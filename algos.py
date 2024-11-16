@@ -29,7 +29,7 @@ def readtxt(file: str) -> tuple[int, int, list[int]]:
 
 def min_Jars_rec(S: int, V: list[int], k: int) -> int:
     """
-    Algorithme récursif pour trouver le nombre minimum de pots nécessaires pour 
+    Algorithme récursif pour trouver le nombre minimum de pots nécessaires pour
     distribuer la quantité S selon le système de capacité V.
 
     Parameters:
@@ -44,7 +44,7 @@ def min_Jars_rec(S: int, V: list[int], k: int) -> int:
     Returns:
     -------
     int
-        Le nombre minimum de pots nécessaires pour distribuer la quantité S. 
+        Le nombre minimum de pots nécessaires pour distribuer la quantité S.
         Infini si la solution n'existe pas.
     """
 
@@ -137,7 +137,7 @@ def _calc_A_aux(S: int, m: int, V: list[int], k: int, A: list[int], M: list[list
     A : list[int]
         Liste à calculer. Doit être de même taille que la liste V. À l'entrée doit contenir que des 0.
     M: list[list[int]]
-        La matrice déjà remplie par des solutions aux sous-problèmes pour 0 <= s <= S, 0 <= i <= k. 
+        La matrice déjà remplie par des solutions aux sous-problèmes pour 0 <= s <= S, 0 <= i <= k.
             Elle a été utilisée pour trouver le nombre minimum de pots nécessaires pour S et k.
 
     Returns:
@@ -261,12 +261,16 @@ def algorithm_Glouton_aux(S: int, V: list[int], k: int) -> tuple[int, list[int]]
         return inf, []
 
     # Algorithme glouton
-    for i in range(k - 1, -1, -1):  # Parcours des pots en partant de la plus grande capacité
-        while S >= V[i]:  # Tant qu'on peut prendre le pot de capacité V[i]
-            S -= V[i]
-            n += 1
-            A[i] += 1
-
+    for i in range(k-1, -1, -1):
+        # Solution trouvée
+        if S == 0:
+            break
+        # Il est possible de prendre des bocaux de capacité V[i]
+        if S >= V[i]:
+            q = int(S/V[i])  # borne inférieure = nombre max de bocaux
+            A[i] += q
+            S -= V[i]*q
+            n += q
     return n, A
 
 
@@ -324,3 +328,9 @@ def algorithm_Glouton(S: int, V: list[int], k: int) -> tuple[int, list[int]]:
     """
 
     return algorithm_Glouton_aux(S, V, k) if test_Glouton_Compatible(k, V) else min_Jars_ite_backtrack(S, V, k)
+
+
+if __name__ == "__main__":
+    S = 10
+    V = [1, 5, 6]
+    print(algorithm_Glouton_aux(S, V, len(V)))
