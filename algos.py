@@ -238,7 +238,7 @@ def algorithm_Glouton_aux(S: int, V: list[int], k: int) -> tuple[int, list[int]]
     S : int
         Volume total de la confiture.
     V : list[int]
-        Liste des capacités des pots disponibles (doit être triée par ordre décroissant).
+        Liste des capacités des pots disponibles (doit être triée par ordre croissant).
     k : int
         Le nombre de types de pots disponibles, k = len(V).
 
