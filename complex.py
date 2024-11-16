@@ -46,7 +46,7 @@ def time_cpu(Smax: int, kmax: int, func: Callable, d: int, max_time: int = None)
     rows = [f'{s}' for s in range(10, Smax, 10)]
 
     # Créer des colonnes associées aux valeurs de k (1, 2, ..., kmax-1)
-    columns = [f'{k}' for k in range(1, kmax)]
+    columns = [f'{k}' for k in range(1, kmax, 2)]
 
     # Créer un DataFrame vide avec les lignes (rows) et colonnes (columns)
     df = pd.DataFrame(index=rows, columns=columns)
@@ -56,10 +56,10 @@ def time_cpu(Smax: int, kmax: int, func: Callable, d: int, max_time: int = None)
 
     # Boucle sur chaque valeur de s (incréments de 10) et k (incréments de 1)
     for s in range(10, Smax, 10):
-        for k in range(1, kmax):
+        for k in range(2, kmax+1):
+
             # Créer la liste V : les capacités des pots (d est utilisé)
             V = [d ** i for i in range(k)]
-
             # Chronométrer l'exécution de la fonction func(x, V, y)
             timeStart = time.time()  # Démarrer le chrono
             func(s, V, k)
@@ -82,12 +82,12 @@ def time_cpu(Smax: int, kmax: int, func: Callable, d: int, max_time: int = None)
 
 
 if __name__ == "__main__":
-    S = 500
+    S = 10000
     k = 6
-    d = 4
+    d = 3
     func = min_Jars_ite_backtrack
     f_name = {algorithm_Glouton: "glouton", min_Jars_ite: "ite",
               min_Jars_rec: "rec", min_Jars_ite_backtrack: "backtrack"}
 
     df = time_cpu(S, k, func, d, max_time=30)
-    df.to_csv(f"data/{f_name[func]}_s{S}_k{k}_d{d}.csv")
+    # df.to_csv(f"data/{f_name[func]}_s{S}_k{k}_d{d}.csv")

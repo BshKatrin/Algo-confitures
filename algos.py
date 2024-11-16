@@ -29,23 +29,23 @@ def readtxt(file: str) -> tuple[int, int, list[int]]:
 
 def min_Jars_rec(S: int, V: list[int], k: int) -> int:
     """
-    Fonction récursive pour trouver le nombre minimum de pots nécessaires pour 
-    atteindre la quantité S en utilisant un système de capacité V.
+    Algorithme récursif pour trouver le nombre minimum de pots nécessaires pour 
+    distribuer la quantité S selon le système de capacité V.
 
     Parameters:
     ----------
     S : int
-        La quantité cible à atteindre.
+        Volume total de la confiture.
     V : list[int]
         Liste des capacités des pots disponibles.
     k : int
-        Le nombre de types de pots disponibles.
+        Le nombre de types de pots disponibles, k = len(V).
 
     Returns:
     -------
     int
-        Le nombre minimum de pots nécessaires pour atteindre la quantité S, ou
-        infini si ce n'est pas possible.
+        Le nombre minimum de pots nécessaires pour distribuer la quantité S. 
+        Infini si la solution n'existe pas.
     """
 
     # Cas de base: si S = 0, on n'a besoin d'aucun pot
@@ -62,29 +62,34 @@ def min_Jars_rec(S: int, V: list[int], k: int) -> int:
 
 def min_Jars_ite(S: int, V: list[int], k: int) -> tuple[int, list[int]]:
     """
-    Fonction itérative pour trouver le nombre minimum de pots nécessaires pour 
-    atteindre la quantité S en utilisant un système de capacité V.
+    Algorithme de programmation dynamique (bottom-up) pour trouver le nombre minimum de pots nécessaires pour
+    distribuer la quantité S selon le système de capacité V.
+    Les solutions des sous-problèmes incluent le nombre minimum de pots nécessaires ainsi qu'une liste A.
 
     Parameters:
     ----------
     S : int
-        La quantité cible à atteindre.
+        Volume total de la confiture.
     V : list[int]
         Liste des capacités des pots disponibles.
     k : int
-        Le nombre de types de pots disponibles.
+        Le nombre de types de pots disponibles, k = len(V).
 
     Returns:
     -------
     tuple[int, list[int]]
-        Un tuple contenant le nombre minimum de pots utilisés et la liste A,
-        où A[i] indique le nombre de pots de capacité V[i] utilisés.
+        Un tuple contenant
+            - le nombre minimum de pots utilisés
+            - une liste A, où A[i] indique le nombre de pots de capacité V[i] utilisé
+
+        Un tuple (inf, []) si la solution n'existe pas.
     """
 
     # Cas d'impossibilité: si S < 0 ou qu'il n'y a plus de pots disponibles
     if S < 0 or k == 0:
         return (inf, [])
 
+    # Initialisation de la matrice
     A = [0] * k
     M = [[(0, deepcopy(A)) for _ in range(k+1)] for _ in range(S+1)]
 
@@ -114,79 +119,85 @@ def min_Jars_ite(S: int, V: list[int], k: int) -> tuple[int, list[int]]:
     return M[s][i]
 
 
-def calc_A_aux(S: int, m: int, V: list[int], i: int, A: list[int]) -> list[int]:
+def _calc_A_aux(S: int, m: int, V: list[int], k: int, A: list[int], M: list[list[int]]) -> list[int]:
     """
-    Fonction récursif qui implémente l'algorithme du type 'retour sur trace'. 
-    La fonction calcule une liste A tel que A[i] représente le nombre de bocaux de capacité V[i] à remplir.
+    Fonction auxiliaire pour 'min_Jars_ite_backtrack'. Elle implémente un algorithme du type
+    'retour sur trace'. Cet algorithme calcule une liste A sachant le nombre minimum de pots nécessaires.
 
     Parameters:
     ----------
     S : int
-        La quantité cible à atteindre.
+        Volume total de la confiture.
     m : int
-        Le nombre de bocaux minimum. 
+        Le nombre de bocaux minimum.
     V : list[int]
         Liste des capacités des pots disponibles.
     k : int
-        Le nombre de types de pots disponibles.
+        Le nombre de types de pots disponibles, k = len(V).
     A : list[int]
         Liste à calculer. Doit être de même taille que la liste V. À l'entrée doit contenir que des 0.
+    M: list[list[int]]
+        La matrice déjà remplie par des solutions aux sous-problèmes pour 0 <= s <= S, 0 <= i <= k. 
+            Elle a été utilisée pour trouver le nombre minimum de pots nécessaires pour S et k.
+
     Returns:
     -------
-    tuple[int, list[int]]
-        Un tuple contenant le nombre minimum de pots utilisés et la liste A,
-        où A[i] indique le nombre de pots de capacité V[i] utilisés.
+    list[int]
+        Une liste A, où A[i] indique le nombre de pots de capacité V[i] utilisé.
+        A = [] si la solution n'existe pas.
     """
 
     # Cas d'impossibilité. Doit pas arriver
     if m < 0 or S < 0:
         return []
+
     # Solution trouvée
     if m == 0 and S == 0:
         return A
 
     # N'est pas une solution.
-    if m == 0 or S < 0 or i == 0:
+    if m == 0 or S < 0 or k == 0:
         return []
 
-    # Cas 1 : Ne pas prendre le bocal de capacité V[i]
-    A1 = calc_A_aux(S, m, V, i-1, A)
-    # Si A1 n'est pas vide, prendre A1 en compte
-    if A1:
-        return A1
-    # A1 n'est pas une solution, passer à l'autre cas
+    # Trouver min{(S, i-1), (S-V[i], i)}
+    m1 = M[S][k-1]
+    m2 = inf
+    if S - V[k-1] >= 0:
+        m2 = M[S-V[k-1]][k]
 
-    # Cas 2 : prendre le bocal de capacité V[i]
-    A[i-1] += 1
-    A2 = calc_A_aux(S-V[i-1], m-1, V, i, A)
-    # Si A2 n'est pas vide, prendre A2 en compte
-    if A2:
-        return A2
-    # A2 n'est pas une solution
-    A[i-1] -= 1
+    # Cas 1: ne pas prendre le bocal de capacite V[i]
+    if m1 < m2:
+        return _calc_A_aux(S, m, V, k-1, A, M)
+    else:
+        # Cas 2 : prendre le bocal de capacité V[i]
+        A[k-1] += 1
+        return _calc_A_aux(S-V[k-1], m-1, V, k, A, M)
 
 
 def min_Jars_ite_backtrack(S: int, V: list[int], k: int) -> tuple[int, list[int]]:
     """
-    Fonction itérative qui appelle la fonction récursif. 
-    Partie itérative : calcul du nombre minimum de pots nécessaires pour atteindre la quantité S en utilisant
-        un système de capacité V.
-    Partie récursive : calcul de la liste A tel que A[i] représente le nombre de bocaux de capacité V[i] à remplir.
+    Algorithme de programmation dynamique (bottom-up) pour calculer le nombre minimum de pots nécessaires
+    distribuer la quantité S selon le système de capacités V.
+    Les solutions des sous-problèmes incluent uniquement le nombre minimum de pots nécessaires.
+    Une liste A pour (S, V, k) est calculée à l'aide d'un algorithme backtrack.
 
     Parameters:
     ----------
     S : int
-        La quantité cible à atteindre.
+        Volume total de la confiture.
     V : list[int]
         Liste des capacités des pots disponibles.
     k : int
-        Le nombre de types de pots disponibles.
+        Le nombre de types de pots disponibles, k = len(V).
 
     Returns:
     -------
     tuple[int, list[int]]
-        Un tuple contenant le nombre minimum de pots utilisés et la liste A,
-        où A[i] indique le nombre de pots de capacité V[i] utilisés.
+        Un tuple contenant
+            - le nombre minimum de pots utilisés
+            - une liste A, où A[i] indique le nombre de pots de capacité V[i] utilisé
+
+        Un tuple (inf, []) si la solution n'existe pas.
     """
 
     # Cas d'impossibilité: si S < 0 ou qu'il n'y a plus de pots disponibles
@@ -213,30 +224,34 @@ def min_Jars_ite_backtrack(S: int, V: list[int], k: int) -> tuple[int, list[int]
 
     m = M[s][i]  # nombre de bocaux minimum
     A = [0] * k if k else []
-    A = calc_A_aux(S, m, V, k, A)  # fonction récursive
+    A = _calc_A_aux(S, m, V, k, A, M)  # algorithme backtrack
     return m, A
 
 
 def algorithm_Glouton_aux(S: int, V: list[int], k: int) -> tuple[int, list[int]]:
     """
-    Algorithme glouton pour déterminer le nombre minimum de pots nécessaires 
-    pour atteindre la quantité S à partir d'un système de capacités V glouton-compatible.
+    Algorithme glouton pour déterminer le nombre minimum de pots nécessaires
+    pour distribuer la quantité S selon le système de capacités V qui est glouton-compatible.
 
     Parameters:
     ----------
     S : int
-        La quantité cible à atteindre.
+        Volume total de la confiture.
     V : list[int]
         Liste des capacités des pots disponibles (doit être triée par ordre décroissant).
     k : int
-        Le nombre de types de pots disponibles.
+        Le nombre de types de pots disponibles, k = len(V).
 
     Returns:
     -------
     tuple[int, list[int]]
-        Un tuple contenant le nombre minimum de pots utilisés et la liste A,
-        où A[i] indique le nombre de pots de capacité V[i] utilisés.
+        Un tuple contenant
+            - le nombre minimum de pots utilisés
+            - une liste A, où A[i] indique le nombre de pots de capacité V[i] utilisé
+
+        Un tuple (inf, []) si la solution n'existe pas.
     """
+
     # Initialisation du nombre total de pots utilisés et de la liste des quantités utilisées
     n: int = 0
     A: list[int] = [0] * k
@@ -264,13 +279,14 @@ def test_Glouton_Compatible(k: int, V: list[int]) -> bool:
     V : list[int]
         Liste des capacités des pots disponibles (doit être triée par ordre décroissant).
     k : int
-        Le nombre de types de pots disponibles.
+        Le nombre de types de pots disponibles, k = len(V).
 
     Returns:
     -------
     bool
-        True si le système V, k est glouton-compatible, False sinon.
+        True si le système de capacités V est glouton-compatible, False sinon.
     """
+
     if (k >= 3):
         for s in range(V[2] + 2, V[k - 2] + V[k - 1]):
             for j in range(1, k + 1):
@@ -281,22 +297,30 @@ def test_Glouton_Compatible(k: int, V: list[int]) -> bool:
 
 def algorithm_Glouton(S: int, V: list[int], k: int) -> tuple[int, list[int]]:
     """
-    Algorithme glouton pour déterminer le nombre minimum de pots nécessaires 
-    pour atteindre la quantité S à partir d'un système de capacités V quelconque.
+    Détermine le nombre minimum de pots nécessaires pour distribuer la quantité S
+    selon un système de capacités V quelconque.
+
+    La fonction vérifie si le système est glouton-compatible.
+        - Si oui, la solution est obtenue à l'aide de l'algorithme glouton.
+        - Si non, un algorithme de programmation dynamique (bottom-up) suivi d'un backtracking est utilisé.
 
     Parameters:
     ----------
     S : int
-        La quantité cible à atteindre.
+        Volume total de la confiture.
     V : list[int]
         Liste des capacités des pots disponibles (doit être triée par ordre décroissant).
     k : int
-        Le nombre de types de pots disponibles.
+        Le nombre de types de pots disponibles, k = len(V).
 
     Returns:
     -------
     tuple[int, list[int]]
-        Un tuple contenant le nombre minimum de pots utilisés et la liste A,
-        où A[i] indique le nombre de pots de capacité V[i] utilisés.
+        Un tuple contenant
+            - le nombre minimum de pots utilisés
+            - une liste A, où A[i] indique le nombre de pots de capacité V[i] utilisé
+
+        Un tuple (inf, []) si la solution n'existe pas.
     """
-    return algorithm_Glouton_aux(S, V, k) if test_Glouton_Compatible(k, V) else min_Jars_ite(S, V, k)
+
+    return algorithm_Glouton_aux(S, V, k) if test_Glouton_Compatible(k, V) else min_Jars_ite_backtrack(S, V, k)
