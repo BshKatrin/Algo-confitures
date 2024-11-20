@@ -1,12 +1,20 @@
-# Algo-confitures
+# Algo - Confitures
+Ce dépôt contient le code source du projet réalisé dans le cadre de l'UE Algorithmique II (LU3IN003). Il aborde les thématiques suivantes :  
+> - La programmation récursive.  
+> - La programmation dynamique et le retour en arrière.  
+> - Les algorithmes gloutons.
 
 ## Binôme
-
 - Ekaterina BOGUSH
 - Rayane NASRI
 
-## Organisation des fichiers
+## Bibliothèques utilisés
+Afin de pouvoir executer le code assurez vous d'avoir sur votre machine les bibliothèqes python ci-dessous :
+> - matplotlib
+> - pandas
+> - numpy
 
+## Organisation des fichiers
 - le fichier `algos.py` contient les fonctions qui implémentent 3 algorithmes
 - - Algorithme I (récursif)
 - - Algorithme II (programmation dynamique avec et sans backtracking)
