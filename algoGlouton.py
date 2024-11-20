@@ -1,6 +1,11 @@
 # Les imports
 import random
+import matplotlib
+matplotlib.use('Qt5Agg')
+
+from  matplotlib import pyplot as plt
 from tqdm import tqdm
+
 from algos import test_Glouton_Compatible, algorithm_Glouton_aux, min_Jars_ite
 
 def gen_alea_sys(pmax: int, k: int) -> list[int]:
@@ -74,36 +79,39 @@ def proportion_sys_comp(pmax: int, kmax: int, x: int) -> float:
 
     return total_compatible / (kmax * x)
 
-
-def ecart(pmax: int, kmax: int, f: int = 100) -> tuple[float, int]:
+def ecart(pmax: int, kmax: int, f: int = 100) -> None:
     """
-    Calcule l'écart moyen et maximal entre deux algorithmes sur des systèmes non glouton compatibles.
+    Calcule les écarts moyen et maximal entre deux algorithmes pour des systèmes non glouton-compatibles.
 
-    Cette fonction génère des ensembles aléatoires de `k` entiers pour chaque `k` compris entre 1 et `kmax`.
-    Si un ensemble n'est pas glouton compatible, elle calcule l'écart entre deux algorithmes (min_Jars_ite et algorithm_Glouton)
-    en comparant leur résultat sur une série de tests avec des valeurs différentes. L'écart maximal et moyen est alors retourné.
+    Cette fonction génère des ensembles de capacités (`k` éléments) pour chaque valeur de `k` allant de 1 à `kmax`.
+    Pour chaque ensemble généré, si celui-ci n'est pas glouton-compatible, la fonction compare les résultats de deux
+    algorithmes (`min_Jars_ite` et `algorithm_Glouton`) en appliquant ces algorithmes à une série de tests
+    utilisant des valeurs différentes. Elle calcule ensuite l'écart entre les deux résultats obtenus.
 
-    Parameters
+    La fonction affiche un graphique présentant :
+    - En abscisse : les différentes valeurs de `k`.
+    - En ordonnée : l'écart moyen et l'écart maximal entre les résultats des deux algorithmes.
+
+    Paramètres
     ----------
     pmax : int
-        La valeur maximale que les entiers générés peuvent prendre.
+        Valeur maximale que peuvent prendre les entiers dans les ensembles générés.
     kmax : int
-        Le nombre maximal d'entiers dans chaque ensemble généré.
-    f : int, optional
-        Facteur multiplicatif utilisé pour ajuster les valeurs testées (par défaut 100).
-
-    Returns
-    -------
-    tuple[float, int]
-        Un tuple contenant l'écart moyen et l'écart maximal entre les deux algorithmes.
+        Nombre maximal d'éléments dans chaque ensemble généré.
+    f : int, optionnel
+        Facteur multiplicatif utilisé pour ajuster les valeurs de test (par défaut : 100).
     """
-    max_ecart: int = 0
-    total_ecart: int = 0
-    count: int = 0
+    
+    X = list(range(1, kmax + 1))  # Les abscisses, converties en liste.
+    Y1 = []    # Les ordonnées (Moyenne des écarts).
+    Y2 = []    # Les ordonnées (Écart maximal).
 
     # Boucle sur chaque valeur de `k` de 1 à `kmax`
-    for k in tqdm(range(1, kmax + 1)):  # Correction : Inclure kmax dans la boucle
-        print(k)
+    for k in tqdm(X):
+        max_ecart = 0
+        total_ecart = 0
+        count = 0
+
         for _ in range(10):
             V = gen_alea_sys(pmax, k)
             
@@ -114,6 +122,7 @@ def ecart(pmax: int, kmax: int, f: int = 100) -> tuple[float, int]:
                     y1, _ = min_Jars_ite(s, V, k)
                     y2, _ = algorithm_Glouton_aux(s, V, k)
                     
+                    print(k)
                     print(y1, y2)
                     # Calcul des écarts
                     ecart_actuel = abs(y1 - y2)
@@ -121,8 +130,19 @@ def ecart(pmax: int, kmax: int, f: int = 100) -> tuple[float, int]:
                     total_ecart += ecart_actuel
                     count += 1
 
-    if count == 0:
-        return (0, 0)
-    
-    # Retourne l'écart moyen et l'écart maximal
-    return (total_ecart / count, max_ecart)
+        if count == 0:
+            Y1.append(0.0)
+            Y2.append(0.0)
+        else:
+            Y1.append(total_ecart / count)
+            Y2.append(max_ecart)
+
+    # Tracer la courbe
+    plt.figure(figsize=(8, 5))
+    plt.plot(X, Y1, linestyle='-', color='b', marker='s', label='Écart moyen')
+    plt.plot(X, Y2, linestyle='-', color='r', marker='o', label='Écart maximal')
+    plt.xlabel('Nombre maximal de bocaux $k$')
+    plt.ylabel('Écart moyen et écart maximal')
+    plt.legend()  # Ajout des parenthèses ici
+    plt.grid(True)
+    plt.show()
