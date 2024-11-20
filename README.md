@@ -1,25 +1,44 @@
 # Algo - Confitures
-Ce dépôt contient le code source du projet réalisé dans le cadre de l'UE Algorithmique II (LU3IN003). Il aborde les thématiques suivantes :  
-> - La programmation récursive.  
-> - La programmation dynamique et le retour en arrière.  
-> - Les algorithmes gloutons.
 
-## Binôme
-- Ekaterina BOGUSH
-- Rayane NASRI
+Ce dépôt contient le code source du projet réalisé dans le cadre de l'UE **Algorithmique II (LU3IN003)**. Ce projet explore plusieurs paradigmes algorithmiques :  
+> - **Programmation récursive**.  
+> - **Programmation dynamique**, avec et sans retour en arrière (backtracking).  
+> - **Algorithmes gloutons**.  
 
-## Bibliothèques utilisés
-Afin de pouvoir executer le code assurez vous d'avoir sur votre machine les bibliothèqes python ci-dessous :
-> - matplotlib
-> - pandas
-> - numpy
+---
+
+## Bibliothèques utilisées
+
+Pour exécuter le code, assurez-vous d'avoir installé les bibliothèques Python suivantes :  
+> - `matplotlib`  
+> - `pandas`  
+> - `numpy`  
+> - `tqdm`  
+
+---
 
 ## Organisation des fichiers
-- le fichier `algos.py` contient les fonctions qui implémentent 3 algorithmes
-- - Algorithme I (récursif)
-- - Algorithme II (programmation dynamique avec et sans backtracking)
-- - Algorithme III (glouton)
-- le fichier `tests.py` contient des tests chaque algorithme sur les petites instances
-- le fichier `complex.py` génère les données de temps d'exécution des algorithmes. Ces données sont stockées dans un DataFrame, puis exportées au format .csv (voir le dossier data).
-- le fichier `plot_data.py` contient le code pour générer des graphiques à l'aide de la bibliothèque matplotlib. Le code élimine des valeurs aberrantes éventuelles (qui apparaissent à des moments différents et ne proviennent probablement pas des algorithmes). Les graphiques générés sont sauvegardés dans le dossier `images`.
-- le fichier `algoGlouton.py` contient ... **(à ajouter)**
+
+- **`algos.py`** : Implémente les fonctions des trois algorithmes principaux :  
+  > - Algorithme I : Récursif  
+  > - Algorithme II : Programmation dynamique (avec et sans backtracking)  
+  > - Algorithme III : Glouton  
+
+- **`tests.py`** : Contient des tests pour évaluer chaque algorithme sur de petites instances de problème.
+
+- **`complex.py`** : Gère la génération des données de temps d'exécution des algorithmes. Les résultats sont sauvegardés dans un **DataFrame** et exportés au format `.csv` (dans le dossier `data`).
+
+- **`plot_data.py`** : Permet de générer des graphiques à l'aide de `matplotlib`.  
+  > - Le code inclut une gestion des valeurs aberrantes (liées à des anomalies ponctuelles n'étant pas causées par les algorithmes).  
+  > - Les graphiques produits sont sauvegardés dans le dossier `images`.  
+
+- **`algoGlouton.py`** : Contient les fonctions suivantes :  
+  > - Calcul de la proportion de systèmes compatibles avec l'approche gloutonne.  
+  > - Évaluation de l'écart moyen et de l'écart maximal entre la solution optimale et celle fournie par l'algorithme glouton.  
+
+---
+
+## Auteurs
+
+- **Ekaterina BOGUSH**  
+- **Rayane NASRI**
