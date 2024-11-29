@@ -166,12 +166,13 @@ def _calc_A_aux(S: int, m: int, V: list[int], k: int, A: list[int], M: list[list
         m2 = M[S-V[k-1]][k]
 
     # Cas 1: ne pas prendre le bocal de capacite V[i]
-    if m1 < m2:
-        return _calc_A_aux(S, m, V, k-1, A, M)
-    else:
-        # Cas 2 : prendre le bocal de capacité V[i]
-        A[k-1] += 1
-        return _calc_A_aux(S-V[k-1], m-1, V, k, A, M)
+    if m1 <= m2:
+        A1 = _calc_A_aux(S, m, V, k-1, A, M)
+        if m1 != m2 or A1 != []:  # égalité et la solution n'était pas trouvée
+            return A1
+
+    A[k-1] += 1
+    return _calc_A_aux(S-V[k-1], m-1, V, k, A, M)
 
 
 def min_Jars_ite_backtrack(S: int, V: list[int], k: int) -> tuple[int, list[int]]:
@@ -327,10 +328,9 @@ def algorithm_Glouton(S: int, V: list[int], k: int) -> tuple[int, list[int]]:
         Un tuple (inf, []) si la solution n'existe pas.
     """
 
-    return algorithm_Glouton_aux(S, V, k) if test_Glouton_Compatible(k, V) else min_Jars_ite_backtrack(S, V, k)
+    return algorithm_Glouton_aux(S, V, k) if test_Glouton_Compatible(k, V) else min_Jars_ite(S, V, k)
 
 
 if __name__ == "__main__":
-    S = 10
-    V = [1, 5, 6]
-    print(algorithm_Glouton_aux(S, V, len(V)))
+    S, k, V = readtxt('instances/pb1.txt')
+    print(min_Jars_ite_backtrack(S, V, k))
