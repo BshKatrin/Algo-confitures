@@ -1,7 +1,6 @@
 # Les imports
 import random
 import matplotlib
-matplotlib.use('Qt5Agg')
 
 from  matplotlib import pyplot as plt
 from tqdm import tqdm
@@ -79,6 +78,46 @@ def proportion_sys_comp(pmax: int, kmax: int, x: int) -> float:
 
     return total_compatible / (kmax * x)
 
+def plot_proportion_sys_comp(pmax: int, kmax: int, x: int) -> float:
+    """
+    Calcule la proportion de systèmes glouton compatibles générés aléatoirement.
+
+    Cette fonction génère `x` ensembles de `k` entiers aléatoires pour chaque `k` compris entre 1 et `kmax`.
+    Pour chaque ensemble, elle vérifie si le système est glouton compatible, et calcule la proportion
+    de systèmes qui satisfont cette condition.
+
+    Parameters
+    ----------
+    pmax : int
+        La valeur maximale que les entiers générés peuvent prendre.
+    kmax : int
+        Le nombre maximal d'entiers dans chaque ensemble généré.
+    x : int
+        Le nombre de simulations à réaliser pour chaque valeur de `k`.
+
+    Returns
+    -------
+    float
+        La proportion de systèmes glouton compatibles parmi les ensembles générés.
+    """
+
+    X = []
+    Y = []
+
+    # Boucle sur chaque valeur de `k` de 1 à `kmax`
+    for k in tqdm(range(1, kmax + 1)):
+        X.append(k)
+        Y.append(proportion_sys_comp(pmax, k, x))
+
+    # Tracer la courbe
+    plt.figure(figsize=(8, 5))
+    plt.plot(X, Y, linestyle='-', color='b', label='Proportion des systèmes Glouton-Compatibles')
+    plt.xlabel('Nombre maximal de bocaux $k$')
+    plt.ylabel('Proportion')
+    plt.legend()
+    plt.grid(True)
+    plt.show() 
+
 def ecart(pmax: int, kmax: int, f: int = 100) -> None:
     """
     Calcule les écarts moyen et maximal entre deux algorithmes pour des systèmes non glouton-compatibles.
@@ -121,9 +160,7 @@ def ecart(pmax: int, kmax: int, f: int = 100) -> None:
                 for s in (pmax, pmax * f):
                     y1, _ = min_Jars_ite(s, V, k)
                     y2, _ = algorithm_Glouton_aux(s, V, k)
-                    
-                    print(k)
-                    print(y1, y2)
+
                     # Calcul des écarts
                     ecart_actuel = abs(y1 - y2)
                     max_ecart = max(max_ecart, ecart_actuel)
@@ -145,4 +182,4 @@ def ecart(pmax: int, kmax: int, f: int = 100) -> None:
     plt.ylabel('Écart moyen et écart maximal')
     plt.legend()  # Ajout des parenthèses ici
     plt.grid(True)
-    plt.show()
+    plt.show() 
